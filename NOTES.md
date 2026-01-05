@@ -19,6 +19,15 @@ CREATE DATABASE called task_manager;
 Set up local DB and run migrations
 
 - Configured local Postgres connection and ran EF migrations
-- Backend now serves /tasks (returns [] when no data yet)
+- Backend now serves /tasks (returns [] when empty) after configuring a local Postgres connection and running EF migrations; create requires a valid UserId (no seed user yet).
+
 - Missing: seed data or UI for create/update/delete tasks
+
 - Test: cd backend && dotnet run, open http://localhost:5215/tasks
+
+Oooppsssiiiiee i got wrong file in .gitignore before pushing it i write "backend/appsettings.Development.json" instead of This "backend/appsettings.json" but i already change my postgresql PASSWORD in DB so sheesh.
+
+Added an error in add task
+
+added a dev CORS policy to allow http://localhost:5173
+Change made in Program.cs

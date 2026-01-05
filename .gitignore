@@ -44,4 +44,4 @@ desktop.ini
 # === Logs ===
 logs/
 *.log
-backend/appsettings.Development.json
+backend/appsettings.json
