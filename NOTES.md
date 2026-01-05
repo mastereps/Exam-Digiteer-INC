@@ -38,3 +38,5 @@ Change made in Program.cs
 The Task also has mark pending, markdone and delete and update the API accordingly
 
 add minimal validation like `user id must be positive number upon adding a task.`
+
+Clean the password in app.settings.json
