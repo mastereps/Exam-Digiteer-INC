@@ -19,7 +19,7 @@ CREATE DATABASE called task_manager;
 Set up local DB and run migrations
 
 - Configured local Postgres connection and ran EF migrations
-- Backend now serves /tasks (returns [] when empty) after configuring a local Postgres connection and running EF migrations; create requires a valid UserId (no seed user yet).
+- Backend now serves /tasks (returns [] when empty) after configuring a local Postgres connection and running EF migrations; TODO 1) create requires a valid UserId (no seed user yet).
 
 - Missing: seed data or UI for create/update/delete tasks
 
@@ -31,3 +31,6 @@ Added an error in add task
 
 added a dev CORS policy to allow http://localhost:5173
 Change made in Program.cs
+
+- Backend: set local connection string in `backend/appsettings.json`, then `dotnet tool run dotnet-ef database update` and `dotnet run`.
+- Frontend: `npm run dev`, open `http://localhost:5173`, FIX TODO 1) create a task using an existing UserId (required by the API)
