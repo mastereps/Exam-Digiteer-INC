@@ -1,25 +1,27 @@
-import { useEffect, useState } from 'react';
-import api from "./api/axios"
+import { useEffect, useState } from "react";
+import api from "./api/axios";
 
 function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadTasks() {
       try {
-        const res = await api.get('/tasks');
+        const res = await api.get("/tasks");
         if (!isMounted) return;
         setTasks(res.data);
-      } catch (err) {
+      } catch (error) {
         if (!isMounted) return;
-        setError('Failed to load tasks. Check the API and try again.');
+        setError("Failed to load tasks. Check the API and try again.");
+        console.error(error);
       } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -37,9 +39,9 @@ function Tasks() {
       {error && <p>{error}</p>}
       {!isLoading && !error && (
         <ul>
-          {tasks.map(task => (
+          {tasks.map((task) => (
             <li key={task.id}>
-              {task.title} {task.isDone ? 'ƒo.' : 'ƒ?O'}
+              {task.title} {task.isDone ? "✅" : "❌"}
             </li>
           ))}
         </ul>
