@@ -13,7 +13,13 @@ function Tasks() {
       try {
         const res = await api.get("/tasks");
         if (!isMounted) return;
-        setTasks(res.data);
+        const data = Array.isArray(res.data) ? res.data : res.data?.items;
+        if (!Array.isArray(data)) {
+          setError("Unexpected response from API. Expected a task list.");
+          setTasks([]);
+          return;
+        }
+        setTasks(data);
       } catch (error) {
         if (!isMounted) return;
         setError("Failed to load tasks. Check the API and try again.");
