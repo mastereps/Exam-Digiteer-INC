@@ -11,6 +11,9 @@ function Tasks() {
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState("");
   const [createSuccess, setCreateSuccess] = useState("");
+  const [savingId, setSavingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -81,61 +84,161 @@ function Tasks() {
     }
   }
 
+  async function handleToggle(task) {
+    setActionError("");
+    setSavingId(task.id);
+    try {
+      const res = await api.put(`/tasks/${task.id}`, {
+        title: task.title,
+        isDone: !task.isDone,
+        userId: task.userId,
+      });
+      setTasks((prev) =>
+        prev.map((item) => (item.id === task.id ? res.data : item))
+      );
+    } catch (error) {
+      setActionError("Failed to update task. Check the API and try again.");
+      console.error(error);
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  async function handleDelete(taskId) {
+    setActionError("");
+    setDeletingId(taskId);
+    try {
+      await api.delete(`/tasks/${taskId}`);
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+    } catch (error) {
+      setActionError("Failed to delete task. Check the API and try again.");
+      console.error(error);
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
-    <div>
-      <h2>Tasks</h2>
-      <form onSubmit={handleCreate}>
+    <section className="panel">
+      <div className="panel-header">
         <div>
-          <label>
-            Title
+          <p className="panel-eyebrow">Task board</p>
+          <h2 className="panel-title">Tasks</h2>
+          <p className="panel-subtitle">
+            Add tasks, assign ownership, and track completion status.
+          </p>
+        </div>
+      </div>
+
+      <form className="task-form" onSubmit={handleCreate}>
+        <div className="form-grid">
+          <div className="form-field">
+            <label className="form-label" htmlFor="task-title">
+              Title
+            </label>
             <input
+              id="task-title"
+              className="input"
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Enter task title"
             />
-          </label>
-        </div>
-        <div>
-          <label>
-            User ID
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="task-user">
+              User ID
+            </label>
             <input
+              id="task-user"
+              className="input"
               type="number"
               min="1"
               value={newUserId}
               onChange={(e) => setNewUserId(e.target.value)}
               placeholder="1"
             />
-          </label>
-        </div>
-        <div>
-          <label>
-            Done
+            <p className="field-help">Requires an existing user record.</p>
+          </div>
+          <div className="form-field form-checkbox">
+            <label className="form-label" htmlFor="task-done">
+              Done
+            </label>
             <input
+              id="task-done"
+              className="checkbox"
               type="checkbox"
               checked={newIsDone}
               onChange={(e) => setNewIsDone(e.target.checked)}
             />
-          </label>
+          </div>
         </div>
-        <button type="submit" disabled={isCreating}>
-          {isCreating ? "Saving..." : "Add Task"}
-        </button>
-        {createError && <p>{createError}</p>}
-        {createSuccess && <p>{createSuccess}</p>}
+
+        <div className="form-actions">
+          <button className="button button-primary" type="submit" disabled={isCreating}>
+            {isCreating ? "Saving..." : "Add task"}
+          </button>
+          <div className="form-status">
+            {createError && <p className="status status-error">{createError}</p>}
+            {createSuccess && (
+              <p className="status status-success">{createSuccess}</p>
+            )}
+          </div>
+        </div>
       </form>
-      {isLoading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
-      {!isLoading && !error && (
-        <ul>
-          {tasks.map((task) => (
-            <li key={task.id}>
-              {task.title} {task.isDone ? "✅" : "❌"}
+
+      <div className="divider" />
+
+      {isLoading && <p className="status">Loading tasks...</p>}
+      {error && <p className="status status-error">{error}</p>}
+      {actionError && <p className="status status-error">{actionError}</p>}
+      {!isLoading && !error && tasks.length === 0 && (
+        <p className="status status-muted">No tasks yet. Add one above.</p>
+      )}
+      {!isLoading && !error && tasks.length > 0 && (
+        <ul className="task-list">
+          {tasks.map((task, index) => (
+            <li className="task-item" key={task.id} style={{ "--i": index }}>
+              <div className="task-main">
+                <div>
+                  <p className="task-title">{task.title}</p>
+                  <p className="task-meta">User {task.userId}</p>
+                </div>
+                <span
+                  className={`task-status ${
+                    task.isDone ? "is-done" : "is-pending"
+                  }`}
+                >
+                  {task.isDone ? "Done" : "Pending"}
+                </span>
+              </div>
+              <div className="task-actions">
+                <button
+                  className="button button-ghost"
+                  type="button"
+                  onClick={() => handleToggle(task)}
+                  disabled={savingId === task.id || deletingId === task.id}
+                >
+                  {savingId === task.id
+                    ? "Updating..."
+                    : task.isDone
+                    ? "Mark pending"
+                    : "Mark done"}
+                </button>
+                <button
+                  className="button button-danger"
+                  type="button"
+                  onClick={() => handleDelete(task.id)}
+                  disabled={deletingId === task.id || savingId === task.id}
+                >
+                  {deletingId === task.id ? "Deleting..." : "Delete"}
+                </button>
+              </div>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }
 
